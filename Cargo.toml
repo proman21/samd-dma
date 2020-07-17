@@ -1,10 +1,18 @@
 [package]
 name = "samd-dma"
+description = "DMA wrapper library for SAM micro-controllers"
 version = "0.1.0"
 authors = ["Adam Jacobus <adam.m.jacobus@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+repository = "https://github.com/proman21/samd-dma"
+keywords = ["samd", "atsamd", "samd51", "samd21"]
+categories = ["embedded", "no-std", "hardware-support"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 bitflags = "1.2.1"
@@ -14,15 +22,39 @@ paste = "0.1.18"
 typenum = { version = "1.12", features = ["no_std"] }
 
 [dependencies.atsamd51j19a]
-version = "0.6"
+version = "0.6.0"
+optional = true
+
+[dependencies.atsamd51j20a]
+version = "0.6.0"
+optional = true
+
+[dependencies.atsamd51g19a]
+version = "0.6.0"
+optional = true
+
+[dependencies.atsamd21g18a]
+version = "0.6.0"
+optional = true
+
+[dependencies.atsamd21e18a]
+version = "0.6.0"
 optional = true
 
 [dependencies.atsamd21j18a]
-version = "0.6"
+version = "0.6.0"
 optional = true
 
 [features]
 samd21 = []
+samd21g18a = ["samd21", "atsamd21g18a"]
+samd21e18a = ["samd21", "atsamd21e18a"]
 samd21j18a = ["samd21", "atsamd21j18a"]
 samd5x = []
 samd51j19a = ["samd5x", "atsamd51j19a"]
+samd51j20a = ["samd5x", "atsamd51j20a"]
+samd51g19a = ["samd5x", "atsamd51g19a"]
+
+[[example]]
+name = "simple"
+required-features = ["samd21j18a"]

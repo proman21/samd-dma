@@ -1,4 +1,4 @@
-use atsamd51j19a::Peripherals;
+use atsamd21j18a::Peripherals;
 use cortex_m::singleton;
 
 use samd_dma::consts::*;
