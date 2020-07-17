@@ -1,10 +1,13 @@
 features := "samd21g18a samd21e18a samd21j18a samd51j19a samd51j20a samd51g19a"
 
 release version:
+    #!/usr/bin/env sh
     git diff HEAD --exit-code --name-only
     just build-docs
     cargo readme > README.md
-    git commit -am "chore: Generate docs and readme."
+    if [[ $(git status -s) ]]; then
+        git commit -am "chore: Generate docs and readme."
+    fi
     cargo bump -g {{ version }}
     cargo publish --no-verify
 
