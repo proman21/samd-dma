@@ -4,6 +4,7 @@ release version:
     git diff HEAD --exit-code --name-only
     just build-docs
     cargo readme > README.md
+    git commit -m "chore: Generate docs and readme."
     cargo bump -g {{ version }}
     cargo publish --dry-run --no-verify
 
