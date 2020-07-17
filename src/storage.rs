@@ -33,6 +33,8 @@ mod sealed {
     
     #[cfg(feature = "samd5x")]
     mod samd5x {
+        use super::*;
+
         impl Sealed for Storage13 {}
         impl Sealed for Storage14 {}
         impl Sealed for Storage15 {}
@@ -61,18 +63,18 @@ macro_rules! dma_storage {
         paste::item! {
             #[derive(Default)]
             pub struct [<Storage $n>] {
-                baseaddr: [TransferDescriptor; $n],
-                wbaddr: [TransferDescriptor; $n]
+                baseaddr: [$crate::TransferDescriptor; $n],
+                wbaddr: [$crate::TransferDescriptor; $n]
             }
 
-            impl DmaStorage for [<Storage $n>] {
+            impl $crate::DmaStorage for [<Storage $n>] {
                 type Index = typenum::consts::[<U $n>];
 
-                fn baseaddr(&self) -> *const TransferDescriptor {
+                fn baseaddr(&self) -> *const $crate::TransferDescriptor {
                     self.baseaddr.as_ptr()
                 }
 
-                fn wbaddr(&self) -> *const TransferDescriptor {
+                fn wbaddr(&self) -> *const $crate::TransferDescriptor {
                     self.wbaddr.as_ptr()
                 }
             }
