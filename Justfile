@@ -1,16 +1,11 @@
 features := "samd21g18a samd21e18a samd21j18a samd51j19a samd51j20a samd51g19a"
 
 release version:
-    #!/usr/bin/env sh
     git diff HEAD --exit-code --name-only
-    if [ -z $(git ls-files --exclude-standard --others) ]; then
-        echo "Cannot make release with a dirty working directory."
-    else
-        just build-docs
-        cargo readme > README.md
-        cargo bump -g {{ version }}
-        cargo publish --dry-run --no-verify
-    fi
+    just build-docs
+    cargo readme > README.md
+    cargo bump -g {{ version }}
+    cargo publish --dry-run --no-verify
 
 build-docs:
     #!/usr/bin/env sh
