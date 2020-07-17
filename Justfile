@@ -6,7 +6,8 @@ release version:
     cargo readme > README.md
     git commit -am "chore: Generate docs and readme."
     cargo bump -g {{ version }}
-    cargo publish --dry-run --no-verify
+    git push origin master
+    cargo publish --no-verify
 
 build-docs:
     #!/usr/bin/env sh
