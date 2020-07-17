@@ -9,15 +9,16 @@ release version:
         just build-docs
         cargo readme > README.md
         cargo bump -g {{ version }}
-
+        cargo publish --dry-run --no-verify
     fi
 
 build-docs:
     #!/usr/bin/env sh
     cargo clean --doc
+    cargo doc --no-deps --features samd21g18a
+    rsync -r --no-times --checksum --delete --exclude samd_dma/ --exclude .lock --exclude _config.yml target/doc/ docs
     for feature in {{features}}; do
         cargo doc --no-deps --features $feature
-        cp -nR target/doc/* docs/
-        mv docs/samd_dma docs/$feature
+        rsync -r --no-times --checksum --delete target/doc/samd_dma/ docs/$feature
     done
     cargo readme > docs/index.md
