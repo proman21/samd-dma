@@ -1,0 +1,28 @@
+[package]
+name = "samd-dma"
+version = "0.1.0"
+authors = ["Adam Jacobus <adam.m.jacobus@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bitflags = "1.2.1"
+cortex-m = "0.6.2"
+smart-default = "0.6.0"
+paste = "0.1.18"
+typenum = { version = "1.12", features = ["no_std"] }
+
+[dependencies.atsamd51j19a]
+version = "0.6"
+optional = true
+
+[dependencies.atsamd21j18a]
+version = "0.6"
+optional = true
+
+[features]
+samd21 = []
+samd21j18a = ["samd21", "atsamd21j18a"]
+samd5x = []
+samd51j19a = ["samd5x", "atsamd51j19a"]
