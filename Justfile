@@ -5,7 +5,7 @@ release version:
     cargo bump -g {{ version }}
     just build-docs
     cargo readme > README.md
-    if [[ $(git status -s) ]]; then \
+    if [ -n "$(git status -s)" ]; then \
         git commit -am "chore: Generate docs and readme."; \
     fi
     cargo publish --no-verify
