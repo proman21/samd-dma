@@ -209,6 +209,7 @@ impl Channel {
         return channel_reg!(chctrlb, self.id).read().lvl().variant().into();
     }
 
+    /// Get a mutable reference to the first descriptor for the channel.
     pub fn get_first_descriptor(&self) -> &mut TransferDescriptor {
         unsafe { &mut *self.first_desc }
     }
