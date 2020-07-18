@@ -249,8 +249,13 @@ impl Channel {
     /// 
     /// After this call, this channel will be a part of the DMA arbitration scheme (if its corresponding priority level 
     /// is active), and trigger events will cause the transaction to start from the first descriptor.
-    pub fn enable(&self) {
+    pub fn enable(&mut self) {
         channel_reg!(chctrla, self.id).modify(|_, w| w.enable().set_bit());
+    }
+
+    /// Return whether the channel is enabled or not.
+    pub fn is_enabled(&self) -> bool {
+        channel_reg!(chctrla, self.id).read().enable().bit()
     }
 
     /// Reset the DMA channel. This will set all channel registers to their reset values.
@@ -277,7 +282,7 @@ impl Channel {
     /// 
     /// This call returns immediately, but the suspend operation won't complete until the ongoing burst transfer 
     /// completes.
-    pub fn suspend(&self) -> bool {
+    pub fn suspend(&mut self) -> bool {
         let mut ongoing = true;
         channel_reg!(chctrlb, self.id).modify(|r, w| {
             if r.cmd().is_noact() {
@@ -291,7 +296,7 @@ impl Channel {
 
     /// Resume the ongoing transaction. Returns `true` if command was successfully written, `false` if another command 
     /// is ongoing.
-    pub fn resume(&self) -> bool {
+    pub fn resume(&mut self) -> bool {
         let mut ongoing = true;
         channel_reg!(chctrlb, self.id).modify(|r, w| {
             if r.cmd().is_noact() {
