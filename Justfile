@@ -6,6 +6,7 @@ release version:
     just build-docs
     cargo readme > README.md
     if [ -n "$(git status -s)" ]; then \
+        git add -A .; \
         git commit -am "chore: Generate docs and readme."; \
     fi
     cargo publish --no-verify
