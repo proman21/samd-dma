@@ -10,9 +10,9 @@ use crate::target_device::dmac::chprilvl::PRILVL_A;
 
 bitflags! {
     pub struct Interrupts: u8 {
-        const TransferError = 0x1;
-        const TransferComplete = 0x2;
-        const Suspend = 0x4;
+        const TERR = 0x1;
+        const TCMPL = 0x2;
+        const SUSP = 0x4;
     }
 }
 

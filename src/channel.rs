@@ -336,7 +336,7 @@ impl Channel {
         self.clear_interrupt_flags();
 
         if channel_reg!(chctrla, self.id).read().enable().bit_is_set() {
-            if intflag.intersects(Interrupts::TransferError) {
+            if intflag.intersects(Interrupts::TERR) {
                 #[cfg(feature = "samd5x")]
                 if status.crcerr().bit_is_set() {
                     return Err(TransactionError::CRCError);
@@ -347,7 +347,7 @@ impl Channel {
             }
         }
 
-        if intflag.intersects(Interrupts::Suspend) {
+        if intflag.intersects(Interrupts::SUSP) {
             if status.ferr().bit_is_set() {
                 return Err(TransactionError::InvalidDescriptor);
             } else {
