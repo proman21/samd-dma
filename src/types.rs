@@ -8,6 +8,14 @@ use crate::target_device::dmac::chctrlb::{TRIGACT_A, TRIGSRC_A, LVL_A as PRILVL_
 #[cfg(feature = "samd5x")]
 use crate::target_device::dmac::chprilvl::PRILVL_A;
 
+bitflags! {
+    pub struct Interrupts: u8 {
+        const TransferError = 0x1;
+        const TransferComplete = 0x2;
+        const Suspend = 0x4;
+    }
+}
+
 /// Priority level of a channel.
 pub enum Priority {
     Level0 = 0,

@@ -1,6 +1,6 @@
 use core::fmt;
 use crate::target_device::DMAC;
-use crate::{TriggerSource, TriggerAction, Priority};
+use crate::{TriggerSource, TriggerAction, Priority, Interrupts};
 #[cfg(feature = "samd5x")]
 use crate::{BurstLength, FifoThreshold};
 use crate::descriptors::{TransferDescriptor};
@@ -214,6 +214,27 @@ impl Channel {
         unsafe { &mut *self.first_desc }
     }
 
+    /// Get the channel's interrupt flags.
+    pub fn get_interrupt_flags(&self) -> Interrupts {
+        Interrupts::from_bits_truncate(channel_reg!(chintflag, self.id).read().bits())
+    }
+
+    /// Reset the channel's interrupt flags.
+    pub fn clear_interrupt_flags(&mut self) {
+        channel_reg!(chintflag, self.id).reset();
+    }
+
+    /// Enable interrupts for the channel. Any interrupts that are not set will be disabled.
+    pub fn enable_interrupts(&mut self, interrupts: Interrupts) {
+        channel_reg!(chintenset, self.id).write(|w| unsafe { w.bits(interrupts.bits()) });
+        channel_reg!(chintenclr, self.id).write(|w| unsafe { w.bits(!interrupts.bits()) });
+    }
+
+    /// Get the set of enabled channel interrupts.
+    pub fn get_enabled_interrupts(&self) -> Interrupts {
+        Interrupts::from_bits_truncate(channel_reg!(chintenset, self.id).read().bits())
+    }
+
     /// Read descriptor from the Write-back Address of this channel.
     /// 
     /// # Safety
@@ -309,13 +330,13 @@ impl Channel {
     /// 
     /// Any non-error state will return `Ok(WaitResult)`.
     /// Any errors will be returned as `Err(TransactionError)`.
-    pub fn poll_status(&self) -> Result<WaitResult, TransactionError> {
-        let intflag = channel_reg!(chintflag, self.id).read();
+    pub fn poll_status(&mut self) -> Result<WaitResult, TransactionError> {
+        let intflag = self.get_interrupt_flags();
         let status = channel_reg!(chstatus, self.id).read();
-        channel_reg!(chintflag, self.id).reset();
+        self.clear_interrupt_flags();
 
         if channel_reg!(chctrla, self.id).read().enable().bit_is_set() {
-            if intflag.terr().bit_is_set() {
+            if intflag.intersects(Interrupts::TransferError) {
                 #[cfg(feature = "samd5x")]
                 if status.crcerr().bit_is_set() {
                     return Err(TransactionError::CRCError);
@@ -326,7 +347,7 @@ impl Channel {
             }
         }
 
-        if intflag.susp().bit_is_set() {
+        if intflag.intersects(Interrupts::Suspend) {
             if status.ferr().bit_is_set() {
                 return Err(TransactionError::InvalidDescriptor);
             } else {
