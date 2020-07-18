@@ -1,7 +1,7 @@
 [package]
 name = "samd-dma"
 description = "DMA wrapper library for SAM micro-controllers"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Adam Jacobus <adam.m.jacobus@gmail.com>"]
 edition = "2018"
 readme = "README.md"
