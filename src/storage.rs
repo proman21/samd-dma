@@ -62,6 +62,7 @@ macro_rules! dma_storage {
     ($n:tt) => {
         paste::item! {
             #[derive(Default)]
+            #[repr(align(16))]
             pub struct [<Storage $n>] {
                 baseaddr: [$crate::TransferDescriptor; $n],
                 wbaddr: [$crate::TransferDescriptor; $n]
@@ -136,10 +137,11 @@ pub trait DmaStorage: sealed::Sealed {
 /// prevent undefined behaviour or memory bugs, make sure to uphold the following invariants.
 /// 
 /// 1. The base and write-back addresses MUST point to contiguous blocks of memory.
+/// 2. The base and write-back addresses MUST be 128-bit aligned.
 /// 2. The length of the base and write-back memory regions MUST be equal.
 /// 3. The base and write-back memory regions MUST be statically allocated.
-/// 4. The generic type T MUST be an unsigned typenum less than or equal to the length of the base and write-back memory 
-///    regions.
+/// 4. The generic type T MUST be an unsigned typenum less than or equal to the length of the base and write-back 
+///    memory regions.
 /// 
 /// The base and write-back memory regions' length may be greater than 32, however the DMA system will ignore any further
 /// memory past 32 `TransferDescriptor`'s. The base and write-back memory regions may overlap, but it is not 
