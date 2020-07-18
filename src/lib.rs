@@ -78,6 +78,8 @@ pub struct DMAController<T: 'static + DmaStorage> {
 impl<T: 'static + DmaStorage> DMAController<T> {
     /// Initialise the DMA Controller with the specified storage.
     pub fn init(dmac: DMAC, storage: &'static mut T) -> DMAController<T> {
+        dmac.baseaddr.write(|w| unsafe { w.bits(storage.baseaddr() as u32) });
+        dmac.wrbaddr.write(|w| unsafe { w.bits(storage.wbaddr() as u32) });
         DMAController {
             #[cfg(feature = "samd21")]
             channels: u16::MAX >> 16 - T::Index::U16,
