@@ -8,7 +8,7 @@ use crate::descriptors::{TransferDescriptor};
 #[cfg(feature = "samd5x")]
 macro_rules! channel_reg {
     (@arm $reg:ident, $n:literal) => {
-        paste::expr! { (&*DMAC::ptr()).[<$reg $n>] }
+        paste::expr! { unsafe { &(*DMAC::ptr()).[<$reg $n>] } }
     };
     ($reg:ident, $n:expr) => {
         match $n {
