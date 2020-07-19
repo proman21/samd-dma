@@ -50,7 +50,8 @@ mod types;
 mod descriptors;
 pub mod storage;
 pub mod consts {
-    /// Contains types used to identify DMA channels.
+    //! Contains types used to identify DMA channels.
+    #![allow(missing_docs)]
     use typenum::consts::*;
 
     pub type CH0 = U0;
@@ -69,7 +70,7 @@ pub mod consts {
     #[cfg(feature = "samd5x")]
     mod samd5x {
         use typenum::consts::*;
-        
+
         pub type CH12 = U12;
         pub type CH13 = U13;
         pub type CH14 = U14;
@@ -128,9 +129,9 @@ impl<T: 'static + DmaStorage> DMAController<T> {
         dmac.wrbaddr.write(|w| unsafe { w.bits(storage.wbaddr() as u32) });
         DMAController {
             #[cfg(feature = "samd21")]
-            channels: u16::MAX >> 16 - T::Index::U16,
+            channels: u16::MAX >> 16 - T::Size::U16,
             #[cfg(feature = "samd5x")]
-            channels: u32::MAX >> 32 - T::Index::U32,
+            channels: u32::MAX >> 32 - T::Size::U32,
             storage,
             dmac
         }
@@ -165,7 +166,7 @@ impl<T: 'static + DmaStorage> DMAController<T> {
     /// This will alias the exclusive references of the base and write-back descriptors corresponding to this channel.
     /// The same problem applies when a call to `return_channel` overlaps with a call to this function for the same 
     /// channel.
-    pub fn take_channel<U: Unsigned>(&mut self) -> Option<Channel> where U: IsLess<T::Index, Output = True>{
+    pub fn take_channel<U: Unsigned>(&mut self) -> Option<Channel> where U: IsLess<T::Size, Output = True>{
         if self.channels & (1 << U::USIZE) == 0 {
             None
         } else {
@@ -230,6 +231,7 @@ impl<T: 'static + DmaStorage> DMAController<T> {
         })
     }
 
+    /// Get the interrupt status of all channels.
     pub fn get_channel_interrupt_status(&self) -> Channels {
         Channels::from_bits_truncate(self.dmac.intstatus.read().bits())
     }

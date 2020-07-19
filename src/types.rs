@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use smart_default::SmartDefault;
 
 use crate::target_device::generic::Variant;
@@ -68,6 +69,7 @@ bitflags! {
 
 bitflags! {
     /// A bitfield to represent channel interrupt flags.
+    
     pub struct Interrupts: u8 {
         const TERR = 0x1;
         const TCMPL = 0x2;
@@ -112,6 +114,7 @@ impl From<PRILVL_A> for Priority {
     }
 }
 
+/// Quality of Service guarantee for the DMA system.
 pub enum QoS {
     Disable = 0,
     Low,
@@ -398,8 +401,8 @@ impl From<THRESHOLD_A> for FifoThreshold {
     }
 }
 
-#[derive(SmartDefault)]
 /// When EVSYS events should be output.
+#[derive(SmartDefault)]
 pub enum EventOutput {
     #[default]
     Disable = 0,
@@ -408,7 +411,7 @@ pub enum EventOutput {
 }
 
 impl EventOutput {
-    pub fn from(value: u16) -> EventOutput {
+    pub(crate) fn from(value: u16) -> EventOutput {
         use self::EventOutput::*;
         match value {
             0 => Disable,
@@ -434,7 +437,7 @@ pub enum BlockAction {
 }
 
 impl BlockAction {
-    pub fn from(value: u16) -> BlockAction {
+    pub(crate) fn from(value: u16) -> BlockAction {
         use self::BlockAction::*;
         match value {
             0 => NoAct,
@@ -454,7 +457,7 @@ pub enum BeatSize {
 }
 
 impl BeatSize {
-    pub fn from(value: u16) -> BeatSize {
+    pub(crate) fn from(value: u16) -> BeatSize {
         use self::BeatSize::*;
         match value {
             0 => Byte,
@@ -480,7 +483,7 @@ pub enum StepSize {
 }
 
 impl StepSize {
-    pub fn from(value: u16) -> StepSize {
+    pub(crate) fn from(value: u16) -> StepSize {
         use self::StepSize::*;
         match value {
             0 => X1,

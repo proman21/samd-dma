@@ -7,8 +7,10 @@ use typenum::consts::*;
 use typenum::{Unsigned, IsLessOrEqual};
 use crate::TransferDescriptor;
 
+/// The maximum amount of channels that can exist.
 #[cfg(feature = "samd5x")]
 pub type CHANMAX = U32;
+/// The maximum amount of channels that can exist.
 #[cfg(feature = "samd21")]
 pub type CHANMAX = U12;
 
@@ -61,6 +63,7 @@ mod sealed {
 macro_rules! dma_storage {
     ($n:tt) => {
         paste::item! {
+            /// Storage type for base and write-back memory.
             #[derive(Default)]
             #[repr(align(16))]
             pub struct [<Storage $n>] {
@@ -69,7 +72,7 @@ macro_rules! dma_storage {
             }
 
             impl $crate::DmaStorage for [<Storage $n>] {
-                type Index = typenum::consts::[<U $n>];
+                type Size = typenum::consts::[<U $n>];
 
                 fn baseaddr(&self) -> *const $crate::TransferDescriptor {
                     self.baseaddr.as_ptr()
@@ -125,9 +128,12 @@ dma_storage!(1);
 
 /// Trait for accessing the base and write-back addresses of a storage unit.
 pub trait DmaStorage: sealed::Sealed {
-    type Index: Unsigned + IsLessOrEqual<CHANMAX, Output = True>;
+    /// The number of channels supported.
+    type Size: Unsigned + IsLessOrEqual<CHANMAX, Output = True>;
 
+    /// Get the address for the base descriptor memory.
     fn baseaddr(&self) -> *const TransferDescriptor;
+    /// Get the address for the write-back descriptor memory.
     fn wbaddr(&self) -> *const TransferDescriptor;
 }
 
@@ -174,7 +180,7 @@ impl<T: Unsigned + IsLessOrEqual<CHANMAX, Output = True>> UnsafeStorage<T> {
 }
 
 impl<T: Unsigned + IsLessOrEqual<CHANMAX, Output = True>> DmaStorage for UnsafeStorage<T> {
-    type Index = T;
+    type Size = T;
 
     fn baseaddr(&self) -> *const TransferDescriptor {
         self.baseaddr.as_ptr()
