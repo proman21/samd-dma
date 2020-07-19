@@ -18,6 +18,7 @@
 //! Because of the design of the DMA system on the SAMD21 family, any channel methods that modify channel registers are
 //! NOT interrupt-safe. Beware of accessing or mutating channel register without calling in an interrupt-free section.
 #![no_std]
+#![deny(missing_docs)]
 
 #[cfg(not(any(feature = "samd5x", feature = "samd21")))]
 compile_error!("Please use this crate's feature flags to select a SAM micro-controller to target.");
