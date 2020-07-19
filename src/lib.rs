@@ -183,4 +183,8 @@ impl<T: 'static + DmaStorage> DMAController<T> {
             Priority::Level3 => w.rrlvlen3().bit(enable),
         })
     }
+
+    pub fn get_channel_interrupt_status(&self) -> Channels {
+        Channels::from_bits_truncate(self.dmac.intstatus.read().bits())
+    }
 }

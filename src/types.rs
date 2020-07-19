@@ -9,6 +9,65 @@ use crate::target_device::dmac::chctrlb::{TRIGACT_A, TRIGSRC_A, LVL_A as PRILVL_
 use crate::target_device::dmac::chprilvl::PRILVL_A;
 
 bitflags! {
+    /// A bitfield of possible channels.
+    pub struct Channels: u32 {
+        const CHAN0 = 1 << 0;
+        const CHAN1 = 1 << 1;
+        const CHAN2 = 1 << 2;
+        const CHAN3 = 1 << 3;
+        const CHAN4 = 1 << 4;
+        const CHAN5 = 1 << 5;
+        const CHAN6 = 1 << 6;
+        const CHAN7 = 1 << 7;
+        const CHAN8 = 1 << 8;
+        const CHAN9 = 1 << 9;
+        const CHAN10 = 1 << 10;
+        const CHAN11 = 1 << 11;
+        #[cfg(feature = "samd5x")]
+        const CHAN12 = 1 << 12;
+        #[cfg(feature = "samd5x")]
+        const CHAN13 = 1 << 13;
+        #[cfg(feature = "samd5x")]
+        const CHAN14 = 1 << 14;
+        #[cfg(feature = "samd5x")]
+        const CHAN15 = 1 << 15;
+        #[cfg(feature = "samd5x")]
+        const CHAN16 = 1 << 16;
+        #[cfg(feature = "samd5x")]
+        const CHAN17 = 1 << 17;
+        #[cfg(feature = "samd5x")]
+        const CHAN18 = 1 << 18;
+        #[cfg(feature = "samd5x")]
+        const CHAN19 = 1 << 19;
+        #[cfg(feature = "samd5x")]
+        const CHAN20 = 1 << 20;
+        #[cfg(feature = "samd5x")]
+        const CHAN21 = 1 << 21;
+        #[cfg(feature = "samd5x")]
+        const CHAN22 = 1 << 22;
+        #[cfg(feature = "samd5x")]
+        const CHAN23 = 1 << 23;
+        #[cfg(feature = "samd5x")]
+        const CHAN24 = 1 << 24;
+        #[cfg(feature = "samd5x")]
+        const CHAN25 = 1 << 25;
+        #[cfg(feature = "samd5x")]
+        const CHAN26 = 1 << 26;
+        #[cfg(feature = "samd5x")]
+        const CHAN27 = 1 << 27;
+        #[cfg(feature = "samd5x")]
+        const CHAN28 = 1 << 28;
+        #[cfg(feature = "samd5x")]
+        const CHAN29 = 1 << 29;
+        #[cfg(feature = "samd5x")]
+        const CHAN30 = 1 << 30;
+        #[cfg(feature = "samd5x")]
+        const CHAN31 = 1 << 31;
+    }
+}
+
+bitflags! {
+    /// A bitfield to represent channel interrupt flags.
     pub struct Interrupts: u8 {
         const TERR = 0x1;
         const TCMPL = 0x2;
