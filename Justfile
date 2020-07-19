@@ -1,7 +1,12 @@
 features := "samd21g18a samd21e18a samd21j18a samd51j19a samd51j20a samd51g19a"
 
+check:
+    cargo check --features samd51j19a
+    cargo check --features samd21j18a
+
 release version:
     git diff HEAD --exit-code --name-only
+    just check
     cargo bump -g {{ version }}
     just build-docs
     cargo readme > README.md
