@@ -48,6 +48,52 @@ mod channel;
 mod types;
 mod descriptors;
 pub mod storage;
+pub mod consts {
+    /// Contains types used to identify DMA channels.
+    use typenum::consts::*;
+
+    pub type CH0 = U0;
+    pub type CH1 = U1;
+    pub type CH2 = U2;
+    pub type CH3 = U3;
+    pub type CH4 = U4;
+    pub type CH5 = U5;
+    pub type CH6 = U6;
+    pub type CH7 = U7;
+    pub type CH8 = U8;
+    pub type CH9 = U9;
+    pub type CH10 = U10;
+    pub type CH11 = U11;
+
+    #[cfg(feature = "samd5x")]
+    mod samd5x {
+        use typenum::consts::*;
+        
+        pub type CH12 = U12;
+        pub type CH13 = U13;
+        pub type CH14 = U14;
+        pub type CH15 = U15;
+        pub type CH16 = U16;
+        pub type CH17 = U17;
+        pub type CH18 = U18;
+        pub type CH19 = U19;
+        pub type CH20 = U20;
+        pub type CH21 = U21;
+        pub type CH22 = U22;
+        pub type CH23 = U23;
+        pub type CH24 = U24;
+        pub type CH25 = U25;
+        pub type CH26 = U26;
+        pub type CH27 = U27;
+        pub type CH28 = U28;
+        pub type CH29 = U29;
+        pub type CH30 = U30;
+        pub type CH31 = U31;
+    }
+    
+    #[cfg(feature = "samd5x")]
+    pub use self::samd5x::*;
+}
 
 #[allow(unused_imports)]
 use core::u32;
@@ -61,7 +107,6 @@ use storage::DmaStorage;
 pub use self::channel::*;
 pub use self::types::*;
 pub use self::descriptors::*;
-pub use typenum::consts;
 
 /// DMA system controller.
 /// 

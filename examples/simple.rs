@@ -10,7 +10,7 @@ fn main() {
     let peri = Peripherals::take().unwrap();
     let mut dma = DMAController::init(peri.DMAC, dma_storage);
 
-    let mut channel = dma.take_channel::<U0>().unwrap();
+    let mut channel = dma.take_channel::<CH0>().unwrap();
     let descriptor = channel.get_first_descriptor();
 
     return ();
