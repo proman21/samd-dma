@@ -7,7 +7,7 @@
 Add the following line to your dependencies section in `Cargo.toml`
 
 ```toml
-samd-dma = "0.2.1"
+samd-dma = "0.3.0"
 ```
 
 The following feature flags control which MCU variant you are targeting.
