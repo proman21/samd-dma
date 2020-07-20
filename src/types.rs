@@ -4,10 +4,14 @@ use smart_default::SmartDefault;
 use crate::target_device::generic::Variant;
 #[cfg(feature = "samd5x")]
 use crate::target_device::dmac::chctrla::{TRIGACT_A, BURSTLEN_A, THRESHOLD_A, TRIGSRC_A};
-#[cfg(feature = "samd21")]
-use crate::target_device::dmac::chctrlb::{TRIGACT_A, TRIGSRC_A, LVL_A as PRILVL_A};
 #[cfg(feature = "samd5x")]
 use crate::target_device::dmac::chprilvl::PRILVL_A;
+#[cfg(feature = "samd5x")]
+use crate::target_device::dmac::prictrl0::{QOS0_A, QOS1_A, QOS2_A, QOS3_A};
+#[cfg(feature = "samd21")]
+use crate::target_device::dmac::chctrlb::{TRIGACT_A, TRIGSRC_A, LVL_A as PRILVL_A};
+#[cfg(feature = "samd21")]
+use crate::target_device::dmac::qosctrl::{DQOS_A, FQOS_A, WRBQOS_A};
 
 bitflags! {
     /// A bitfield of possible channels.
@@ -69,12 +73,20 @@ bitflags! {
 
 bitflags! {
     /// A bitfield to represent channel interrupt flags.
-    
     pub struct Interrupts: u8 {
         const TERR = 0x1;
         const TCMPL = 0x2;
         const SUSP = 0x4;
     }
+}
+
+/// The status of a channel.
+pub enum Status {
+    Busy,
+    Pending,
+    FetchError,
+    #[cfg(feature = "samd5x")]
+    CRCError
 }
 
 /// Priority level of a channel.
@@ -120,6 +132,104 @@ pub enum QoS {
     Low,
     Medium,
     Critical,
+}
+
+#[cfg(feature = "samd5x")]
+impl From<QOS0_A> for QoS {
+    fn from(val: QOS0_A) -> QoS {
+        use self::QoS::*;
+        use self::QOS0_A::*;
+        match val {
+            REGULAR => Disable,
+            SHORTAGE => Low,
+            SENSITIVE => Medium,
+            CRITICAL => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd5x")]
+impl From<QOS1_A> for QoS {
+    fn from(val: QOS1_A) -> QoS {
+        use self::QoS::*;
+        use self::QOS1_A::*;
+        match val {
+            REGULAR => Disable,
+            SHORTAGE => Low,
+            SENSITIVE => Medium,
+            CRITICAL => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd5x")]
+impl From<QOS2_A> for QoS {
+    fn from(val: QOS2_A) -> QoS {
+        use self::QoS::*;
+        use self::QOS2_A::*;
+        match val {
+            REGULAR => Disable,
+            SHORTAGE => Low,
+            SENSITIVE => Medium,
+            CRITICAL => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd5x")]
+impl From<QOS3_A> for QoS {
+    fn from(val: QOS3_A) -> QoS {
+        use self::QoS::*;
+        use self::QOS3_A::*;
+        match val {
+            REGULAR => Disable,
+            SHORTAGE => Low,
+            SENSITIVE => Medium,
+            CRITICAL => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd21")]
+impl From<DQOS_A> for QoS {
+    fn from(val: DQOS_A) -> QoS {
+        use self::QoS::*;
+        use self::DQOS_A::*;
+        match val {
+            DISABLE => Disable,
+            LOW => Low,
+            MEDIUM => Medium,
+            HIGH => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd21")]
+impl From<FQOS_A> for QoS {
+    fn from(val: FQOS_A) -> QoS {
+        use self::QoS::*;
+        use self::FQOS_A::*;
+        match val {
+            DISABLE => Disable,
+            LOW => Low,
+            MEDIUM => Medium,
+            HIGH => Critical
+        }
+    }
+}
+
+#[cfg(feature = "samd21")]
+impl From<WRBQOS_A> for QoS {
+    fn from(val: WRBQOS_A) -> QoS {
+        use self::QoS::*;
+        use self::WRBQOS_A::*;
+        match val {
+            DISABLE => Disable,
+            LOW => Low,
+            MEDIUM => Medium,
+            HIGH => Critical
+        }
+    }
 }
 
 /// Length of a burst in beats.

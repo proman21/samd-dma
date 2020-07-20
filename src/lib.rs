@@ -99,7 +99,6 @@ pub mod consts {
 
 #[allow(unused_imports)]
 use core::u32;
-#[allow(unused_imports)]
 use core::u16;
 use target_device::DMAC;
 use typenum::consts::*;
@@ -157,8 +156,21 @@ impl<T: 'static + DmaStorage> DMAController<T> {
         self.dmac.ctrl.read().dmaenable().bit_is_set()
     }
 
-    /// Take a DMA channel by its number. If the channel has already been taken or if the ID is not available,
+    /// Get the value of the "Run While Debug" setting.
+    pub fn get_run_while_debug(&self) -> bool {
+        self.dmac.dbgctrl.read().dbgrun().bit()
+    }
+
+    /// Set the value of the "Run While Debug" setting.
+    pub fn set_run_while_debug(&mut self, val: bool) {
+        self.dmac.dbgctrl.write(|w| w.dbgrun().bit(val));
+    } 
+
+    /// Take a DMA channel. If the channel has already been taken or if the ID is not available,
     /// `None` is returned. If you don't call `return_channel` on this channel, you can never get it back.
+    /// 
+    /// This method uses the turbofish syntax to specify the channel ID you wish to take, like so:
+    /// `take_channel::<CH1>()`.
     /// 
     /// # Safety
     /// 
@@ -210,6 +222,64 @@ impl<T: 'static + DmaStorage> DMAController<T> {
         })
     }
 
+    /// Get the Quality of Service guarantee for the specified priority level.
+    #[cfg(feature = "samd5x")]
+    pub fn get_priority_qos(&self, level: Priority) -> QoS {
+        match level {
+            Priority::Level0 => self.dmac.prictrl0.read().qos0().variant().into(),
+            Priority::Level1 => self.dmac.prictrl0.read().qos1().variant().into(),
+            Priority::Level2 => self.dmac.prictrl0.read().qos2().variant().into(),
+            Priority::Level3 => self.dmac.prictrl0.read().qos3().variant().into(),
+        }
+    }
+
+    /// Set the Quality of Service guarantee for the specified priority level.
+    #[cfg(feature = "samd5x")]
+    pub fn set_piority_qos(&mut self, level: Priority, qos: QoS) {
+        match level {
+            Priority::Level0 => self.dmac.prictrl0.modify(|_, w| w.qos0().bits(qos as u8)),
+            Priority::Level1 => self.dmac.prictrl0.modify(|_, w| w.qos1().bits(qos as u8)),
+            Priority::Level2 => self.dmac.prictrl0.modify(|_, w| w.qos2().bits(qos as u8)),
+            Priority::Level3 => self.dmac.prictrl0.modify(|_, w| w.qos3().bits(qos as u8)),
+        }
+    }
+
+    /// Get the Quality of Service guarantee for data transfer.
+    #[cfg(feature = "samd21")]
+    pub fn get_data_transfer_qos(&self) -> QoS {
+        self.dmac.qosctrl.read().dqos().variant().into()
+    }
+
+    /// Get the Quality of Service guarantee for fetching transfer descriptors.
+    #[cfg(feature = "samd21")]
+    pub fn get_fetch_qos(&self) -> QoS {
+        self.dmac.qosctrl.read().fqos().variant().into()
+    }
+
+    /// Get the Quality of Service guarantee for writing transfer descriptors to the write-back section.
+    #[cfg(feature = "samd21")]
+    pub fn get_write_back_qos(&self) -> QoS {
+        self.dmac.qosctrl.read().wrbqos().variant().into()
+    }
+
+    /// Set the Quality of Service guarantee for data transfer.
+    #[cfg(feature = "samd21")]
+    pub fn set_data_transfer_qos(&mut self, qos: QoS) {
+        self.dmac.qosctrl.modify(|_, w| w.dqos().bits(qos as u8))
+    }
+
+    /// Set the Quality of Service guarantee for fetching transfer descriptors.
+    #[cfg(feature = "samd21")]
+    pub fn set_fetch_qos(&mut self, qos: QoS) {
+        self.dmac.qosctrl.modify(|_, w| w.fqos().bits(qos as u8))
+    }
+
+    /// Set the Quality of Service guarantee for writing transfer descriptors to the write-back section.
+    #[cfg(feature = "samd21")]
+    pub fn set_write_back_qos(&mut self, qos: QoS) {
+        self.dmac.qosctrl.modify(|_, w| w.wrbqos().bits(qos as u8))
+    }
+
     /// Return true if the priority level is enabled.
     pub fn priority_level_enabled(&self, level: Priority) -> bool {
         match level {
@@ -234,5 +304,126 @@ impl<T: 'static + DmaStorage> DMAController<T> {
     /// Get the interrupt status of all channels.
     pub fn get_channel_interrupt_status(&self) -> Channels {
         Channels::from_bits_truncate(self.dmac.intstatus.read().bits())
+    }
+
+    /// Get a bitfield of all pending channels.
+    pub fn get_pending_channels(&self) -> Channels {
+        Channels::from_bits_truncate(self.dmac.pendch.read().bits().into())
+    }
+
+    /// Get a bitfield of all busy channels.
+    pub fn get_busy_channels(&self) -> Channels {
+        Channels::from_bits_truncate(self.dmac.busych.read().bits().into())
+    }
+
+    /// Get ID of the last channel to be granted access to the DMA system.
+    pub fn get_active_channel(&self) -> u8 {
+        self.dmac.active.read().id().bits()
+    }
+
+    /// Send a trigger request to a channel.
+    /// 
+    /// If the channel is not in a pending state, the request is ignored.
+    pub fn trigger_channel(&mut self, id: u8) {
+        self.dmac.swtrigctrl.modify(|r, w| unsafe { w.bits(r.bits() | 1 << id) })
+    }
+
+    /// Get the block transfer count of the currently active channel, if there is one.
+    pub fn get_active_block_transfer_count(&self) -> Option<u16> {
+        let reg = self.dmac.active.read();
+        if reg.abusy().bit_is_set() {
+            Some(reg.btcnt().bits())
+        } else {
+            None
+        }
+    }
+
+    /// Return whether the selected priority level has an active request.
+    pub fn priority_level_has_request(&self, pri: Priority) -> bool {
+        match pri {
+            Priority::Level0 => self.dmac.active.read().lvlex0().bit(),
+            Priority::Level1 => self.dmac.active.read().lvlex1().bit(),
+            Priority::Level2 => self.dmac.active.read().lvlex2().bit(),
+            Priority::Level3 => self.dmac.active.read().lvlex3().bit(),
+        }
+    }
+
+    /// Get the lowest pending interrupt channel's interrupt flags, if present.
+    /// 
+    /// The ID and interrupt flags are returned.
+    pub fn get_lowest_pending_channel_interrupts(&self) -> Option<(u8, Interrupts)> {
+        let reg = self.dmac.intpend.read();
+        let int = Interrupts::from_bits_truncate((reg.bits() & 0x700).to_be_bytes()[0]);
+        if !int.is_empty() {
+            Some((reg.id().bits(), int))
+        } else {
+            None
+        }
+    }
+
+    /// Get the lowest pending interrupt channel's status, if present.
+    /// 
+    /// The ID and status are returned.
+    pub fn get_lowest_pending_channel_status(&self) -> Option<(u8, Option<Status>)> {
+        let reg = self.dmac.intpend.read();
+        let int = Interrupts::from_bits_truncate((reg.bits() & 0x700).to_be_bytes()[0]);
+        if !int.is_empty() {
+            if reg.pend().bit_is_set() {
+                return Some((reg.id().bits(), Some(Status::Pending)));
+            }
+    
+            if reg.busy().bit_is_set() {
+                return Some((reg.id().bits(), Some(Status::Busy)));
+            }
+    
+            if reg.ferr().bit_is_set() {
+                return Some((reg.id().bits(), Some(Status::FetchError)));
+            }
+    
+            #[cfg(feature = "samd5x")]
+            if reg.crcerr().bit_is_set() {
+                return Some((reg.id().bits(), Some(Status::CRCError)));
+            }
+
+            return Some((reg.id().bits(), None));
+        } else {
+            None
+        }
+    }
+
+    /// Get the interrupt flags of a particular channel.
+    pub fn get_channel_pending_interrupts(&mut self, id: u8) -> Interrupts {
+        self.dmac.intpend.modify(|_, w| unsafe { w.id().bits(id) });
+        Interrupts::from_bits_truncate((self.dmac.intpend.read().bits() & 0x700).to_be_bytes()[0])
+    }
+
+    /// Set the interrupt flags of a particular channel.
+    pub fn set_channel_pending_interrupts(&mut self, id: u8, int: Interrupts) {
+        self.dmac.intpend.write(|w| unsafe { w.bits(u16::from_be_bytes([int.bits(), id])) })
+    }
+
+    /// Get the status of a particular channel.
+    pub fn get_channel_status(&mut self, id: u8) -> Option<Status> {
+        self.dmac.intpend.modify(|_, w| unsafe { w.id().bits(id) });
+        let reg = self.dmac.intpend.read();
+
+        if reg.pend().bit_is_set() {
+            return Some(Status::Pending);
+        }
+
+        if reg.busy().bit_is_set() {
+            return Some(Status::Busy);
+        }
+
+        if reg.ferr().bit_is_set() {
+            return Some(Status::FetchError);
+        }
+
+        #[cfg(feature = "samd5x")]
+        if reg.crcerr().bit_is_set() {
+            return Some(Status::CRCError);
+        }
+
+        None
     }
 }
