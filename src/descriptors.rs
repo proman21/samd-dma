@@ -1,6 +1,7 @@
 use core::u16;
 use core::ptr;
 use crate::{
+    BeatSize,
     StepSize,
     BlockAction,
     EventOutput,
@@ -102,6 +103,18 @@ impl TransferDescriptor {
     /// Get the configured block transfer count.
     pub fn get_block_transfer_count(&self) -> u16 {
         self.btcnt
+    }
+
+    /// Get the beat size of the descriptor.
+    pub fn get_beat_size(&self) -> BeatSize {
+        BeatSize::from((self.btctrl.bits() & 0x300) >> 8)
+    }
+
+    /// Set the beat size for the descriptor.
+    pub fn set_beat_size(&mut self, beat_size: BeatSize) {
+        let value = beat_size as u8;
+        self.btctrl.set(RawBlockTransferCtrl::BEATSIZE_1, value & 0b010 != 0);
+        self.btctrl.set(RawBlockTransferCtrl::BEATSIZE_0, value & 0b001 != 0);
     }
 
     /// Get the step size of the descriptor.
