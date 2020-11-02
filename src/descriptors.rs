@@ -41,10 +41,11 @@ pub struct TransferDescriptor {
 impl Default for TransferDescriptor {
     fn default() -> Self {
         TransferDescriptor {
+            btctrl: RawBlockTransferCtrl::empty(),
+            btcnt: 0,
             srcaddr: ptr::null(),
             dstaddr: ptr::null(),
-            descaddr: ptr::null_mut(),
-            ..Default::default()
+            descaddr: ptr::null_mut()
         }
     }
 }
