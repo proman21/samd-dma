@@ -68,6 +68,8 @@ pub struct Channel {
     write_back: *mut TransferDescriptor,
 }
 
+unsafe impl Send for Channel {}
+
 impl Channel {
     pub(crate) fn new(id: u8, first_desc: *mut TransferDescriptor,
         write_back: *mut TransferDescriptor) -> Channel
