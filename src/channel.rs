@@ -188,7 +188,10 @@ impl Channel {
 
     /// Reset the channel's interrupt flags.
     pub fn clear_interrupt_flags(&mut self) {
-        channel_reg!(chintflag, self.id).reset();
+        channel_reg!(chintflag, self.id).write(|w| w
+            .susp().set_bit()
+            .tcmpl().set_bit()
+            .terr().set_bit());
     }
 
     /// Enable interrupts for the channel. Any interrupts that are not set will be disabled.
