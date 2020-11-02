@@ -27,23 +27,20 @@ compile_error!("Please use this crate's feature flags to select a SAM micro-cont
 extern crate bitflags;
 extern crate smart_default;
 
-#[cfg(feature = "samd51j19a")]
-use atsamd51j19a as target_device;
+#[cfg(feature = "samd51j")]
+use atsamd51j as target_device;
 
-#[cfg(feature = "samd51j20a")]
-use atsamd51j20a as target_device;
+#[cfg(feature = "samd51g")]
+use atsamd51g as target_device;
 
-#[cfg(feature = "samd51g19a")]
-use atsamd51g19a as target_device;
+#[cfg(feature = "samd21g")]
+use atsamd21g as target_device;
 
-#[cfg(feature = "samd21g18a")]
-use atsamd21g18a as target_device;
+#[cfg(feature = "samd21e")]
+use atsamd21e as target_device;
 
-#[cfg(feature = "samd21e18a")]
-use atsamd21e18a as target_device;
-
-#[cfg(feature = "samd21j18a")]
-use atsamd21j18a as target_device;
+#[cfg(feature = "samd21j")]
+use atsamd21j as target_device;
 
 mod channel;
 mod types;
