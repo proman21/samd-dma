@@ -67,19 +67,29 @@ macro_rules! dma_storage {
             #[derive(Default)]
             #[repr(align(16))]
             pub struct [<Storage $n>] {
-                baseaddr: [$crate::TransferDescriptor; $n],
-                wbaddr: [$crate::TransferDescriptor; $n]
+                base: [$crate::TransferDescriptor; $n],
+                wrb: [$crate::TransferDescriptor; $n]
+            }
+
+            impl [<Storage $n>] {
+                /// Initialise the storage container.
+                pub const fn new() -> Self {
+                    [<Storage $n>] {
+                        base: [$crate::TransferDescriptor::new(); $n],
+                        wrb: [$crate::TransferDescriptor::new(); $n]
+                    }
+                }
             }
 
             impl $crate::DmaStorage for [<Storage $n>] {
                 type Size = typenum::consts::[<U $n>];
 
                 fn baseaddr(&self) -> *const $crate::TransferDescriptor {
-                    self.baseaddr.as_ptr()
+                    self.base.as_ptr()
                 }
 
                 fn wbaddr(&self) -> *const $crate::TransferDescriptor {
-                    self.wbaddr.as_ptr()
+                    self.wrb.as_ptr()
                 }
             }
         }
