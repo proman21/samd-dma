@@ -1,6 +1,6 @@
 use core::u16;
-use core::ptr;
 use crate::{
+    BeatSize,
     StepSize,
     BlockAction,
     EventOutput,
@@ -27,56 +27,59 @@ bitflags! {
 }
 
 /// The raw descriptor memory structure used by the DMA system to configure a block transfer.
-#[repr(C)]
-#[derive(Debug)]
+#[repr(C, align(16))]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct TransferDescriptor {
     btctrl: RawBlockTransferCtrl,
     btcnt: u16,
-    srcaddr: *const (),
-    dstaddr: *const (),
-    descaddr: *mut TransferDescriptor,
-}
-
-impl Default for TransferDescriptor {
-    fn default() -> Self {
-        TransferDescriptor {
-            srcaddr: ptr::null(),
-            dstaddr: ptr::null(),
-            descaddr: ptr::null_mut(),
-            ..Default::default()
-        }
-    }
+    srcaddr: Option<*const ()>,
+    dstaddr: Option<*const ()>,
+    descaddr: Option<*mut TransferDescriptor>,
 }
 
 impl TransferDescriptor {
     /// Create a new empty descriptor.
-    pub fn new() -> TransferDescriptor {
-        Default::default()
+    pub const fn new() -> TransferDescriptor {
+        TransferDescriptor {
+            btctrl: RawBlockTransferCtrl::empty(),
+            btcnt: 0,
+            srcaddr: None,
+            dstaddr: None,
+            descaddr: None,
+        }
     }
 
     /// Get the type-erased source address.
-    pub fn get_src_addr(&self) -> *const () {
+    pub fn get_src_addr(&self) -> Option<*const ()> {
         self.srcaddr
     }
 
     /// Get the type-erased destination address.
-    pub fn get_dst_addr(&self) -> *const () {
+    pub fn get_dst_addr(&self) -> Option<*const ()> {
         self.dstaddr
     }
 
     /// Get address for the next linked descriptor.
-    pub fn get_next_desc_addr(&self) -> *mut TransferDescriptor {
+    pub fn get_next_desc_addr(&self) -> Option<*mut TransferDescriptor> {
         self.descaddr
     }
 
     /// Set the source address of the descriptor. This is a type erased pointer.
     pub fn set_src_addr(&mut self, addr: *const ()) {
-        self.srcaddr = addr;
+        self.srcaddr = if addr.is_null() {
+            None
+        } else {
+            Some(addr)
+        };
     }
 
     /// Set the destination address of the descriptor. This is a type erased pointer.
     pub fn set_dst_addr(&mut self, addr: *const ()) {
-        self.dstaddr = addr;
+        self.dstaddr = if addr.is_null() {
+            None
+        } else {
+            Some(addr)
+        };
     }
 
     /// Mark the descriptor as valid.
@@ -187,14 +190,12 @@ impl TransferDescriptor {
     }
 
     /// Link a transfer descriptor to execute AFTER this descriptor.
-    pub fn link_descriptor(&mut self, next: *mut TransferDescriptor) {
-        self.descaddr = next;
+    pub fn link_descriptor(&mut self, next: &mut TransferDescriptor) {
+        self.descaddr = Some(next);
     }
 
     /// Unlink the next transfer descriptor, returning its address (which maybe null).
-    pub fn unlink_descriptor(&mut self) -> *mut TransferDescriptor {
-        let next = self.descaddr;
-        self.descaddr = ptr::null_mut();
-        next
+    pub fn unlink_descriptor(&mut self) -> Option<*mut TransferDescriptor> {
+        self.descaddr.take()
     }
 }
