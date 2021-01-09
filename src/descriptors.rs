@@ -120,6 +120,18 @@ impl TransferDescriptor {
         self.btctrl.set(RawBlockTransferCtrl::STEPSIZE_0, value & 0b001 != 0);
     }
 
+    /// Get the bit-width of a beat memory access.
+    pub fn get_beat_size(&self) -> BeatSize {
+        BeatSize::from((self.btctrl.bits() & 0x300) >> 8)
+    }
+
+    /// Set the bit-width of a beat memory access.
+    pub fn set_beat_size(&mut self, size: BeatSize) {
+        let value = size as u8;
+        self.btctrl.set(RawBlockTransferCtrl::BEATSIZE_0, value & 0b01 != 0);
+        self.btctrl.set(RawBlockTransferCtrl::BEATSIZE_1, value & 0b10 != 0);
+    } 
+
     /// Get which address is incremented with the descriptor's step size, if enabled.
     /// 
     /// Returns `true` if the source address is incremented, `false` if the destination address is incremented.

@@ -566,6 +566,18 @@ pub enum BeatSize {
     Word
 }
 
+impl BeatSize {
+    pub(crate) fn from(value: u16) -> BeatSize {
+        use self::BeatSize::*;
+        match value {
+            0 => Byte,
+            1 => HWord,
+            2 => Word,
+            _ => unreachable!()
+        }
+    }
+}
+
 /// Size of the address advancement step.
 #[derive(SmartDefault)]
 pub enum StepSize {
