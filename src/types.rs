@@ -3,9 +3,9 @@ use smart_default::SmartDefault;
 
 use crate::target_device::generic::Variant;
 #[cfg(feature = "samd5x")]
-use crate::target_device::dmac::chctrla::{TRIGACT_A, BURSTLEN_A, THRESHOLD_A, TRIGSRC_A};
+use crate::target_device::dmac::channel::chctrla::{TRIGACT_A, BURSTLEN_A, THRESHOLD_A, TRIGSRC_A};
 #[cfg(feature = "samd5x")]
-use crate::target_device::dmac::chprilvl::PRILVL_A;
+use crate::target_device::dmac::channel::chprilvl::PRILVL_A;
 #[cfg(feature = "samd5x")]
 use crate::target_device::dmac::prictrl0::{QOS0_A, QOS1_A, QOS2_A, QOS3_A};
 #[cfg(feature = "samd21")]
@@ -97,22 +97,6 @@ pub enum Priority {
     Level3,
 }
 
-#[cfg(feature = "samd5x")]
-impl From<Variant<u8, PRILVL_A>> for Priority {
-    fn from(value: Variant<u8, PRILVL_A>) -> Priority {
-        use self::PRILVL_A::*;
-        use self::Priority::*;
-        match value {
-            Variant::Val(LVL0) => Level0,
-            Variant::Val(LVL1) => Level1,
-            Variant::Val(LVL2) => Level2,
-            Variant::Val(LVL3) => Level3,
-            _ => Level0,
-        }
-    }
-}
-
-#[cfg(feature = "samd21")]
 impl From<PRILVL_A> for Priority {
     fn from(value: PRILVL_A) -> Priority {
         use self::PRILVL_A::*;

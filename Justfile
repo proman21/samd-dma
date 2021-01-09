@@ -1,8 +1,8 @@
-features := "samd21g18a samd21e18a samd21j18a samd51j19a samd51j20a samd51g19a"
+features := "samd21g samd21e samd21j samd51j samd51g"
 
 check:
-    cargo check --features samd51j19a
-    cargo check --features samd21j18a
+    cargo check --features samd51j
+    cargo check --features samd21j
 
 release version:
     git diff HEAD --exit-code --name-only
@@ -20,7 +20,7 @@ release version:
 
 build-docs:
     cargo clean --doc
-    cargo doc --no-deps --features samd21g18a
+    cargo doc --no-deps --features samd21g
     rsync -r --no-times --checksum --delete --exclude samd_dma/ --exclude .lock --exclude _config.yml target/doc/ docs
     for feature in {{features}}; do \
         cargo doc --no-deps --features $feature ; \

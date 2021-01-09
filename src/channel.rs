@@ -7,44 +7,9 @@ use crate::descriptors::{TransferDescriptor};
 
 #[cfg(feature = "samd5x")]
 macro_rules! channel_reg {
-    (@arm $reg:ident, $n:literal) => {
-        paste::expr! { unsafe { &(*DMAC::ptr()).[<$reg $n>] } }
-    };
     ($reg:ident, $n:expr) => {
-        match $n {
-            0 => channel_reg!(@arm $reg, 0),
-            1 => channel_reg!(@arm $reg, 1),
-            2 => channel_reg!(@arm $reg, 2),
-            3 => channel_reg!(@arm $reg, 3),
-            4 => channel_reg!(@arm $reg, 4),
-            5 => channel_reg!(@arm $reg, 5),
-            6 => channel_reg!(@arm $reg, 6),
-            7 => channel_reg!(@arm $reg, 7),
-            8 => channel_reg!(@arm $reg, 8),
-            9 => channel_reg!(@arm $reg, 9),
-            10 => channel_reg!(@arm $reg, 10),
-            11 => channel_reg!(@arm $reg, 11),
-            12 => channel_reg!(@arm $reg, 12),
-            13 => channel_reg!(@arm $reg, 13),
-            14 => channel_reg!(@arm $reg, 14),
-            15 => channel_reg!(@arm $reg, 15),
-            16 => channel_reg!(@arm $reg, 16),
-            17 => channel_reg!(@arm $reg, 17),
-            18 => channel_reg!(@arm $reg, 18),
-            19 => channel_reg!(@arm $reg, 19),
-            20 => channel_reg!(@arm $reg, 20),
-            21 => channel_reg!(@arm $reg, 21),
-            22 => channel_reg!(@arm $reg, 22),
-            23 => channel_reg!(@arm $reg, 23),
-            24 => channel_reg!(@arm $reg, 24),
-            25 => channel_reg!(@arm $reg, 25),
-            26 => channel_reg!(@arm $reg, 26),
-            27 => channel_reg!(@arm $reg, 27),
-            28 => channel_reg!(@arm $reg, 28),
-            29 => channel_reg!(@arm $reg, 29),
-            30 => channel_reg!(@arm $reg, 30),
-            31 => channel_reg!(@arm $reg, 31),
-            _ => unreachable!()
+        unsafe {
+            &(&*DMAC::ptr()).channel[$n as usize].$reg
         }
     };
 }
@@ -196,7 +161,7 @@ impl Channel {
     /// Set the priority level of the channel.
     pub fn set_priority(&mut self, priority: Priority) {
         #[cfg(feature = "samd5x")]
-        channel_reg!(chprilvl, self.id).write(|w| unsafe { w.prilvl().bits(priority as u8) });
+        channel_reg!(chprilvl, self.id).write(|w| w.prilvl().bits(priority as u8));
         #[cfg(feature = "samd21")]
         channel_reg!(chctrlb, self.id).modify(|_, w| w.lvl().bits(priority as u8))
     }
