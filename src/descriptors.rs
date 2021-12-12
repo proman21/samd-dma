@@ -5,6 +5,7 @@ use crate::{
     BlockAction,
     EventOutput,
 };
+use core::ptr::NonNull;
 
 bitflags! {
     #[repr(transparent)]
@@ -32,9 +33,9 @@ bitflags! {
 pub struct TransferDescriptor {
     btctrl: RawBlockTransferCtrl,
     btcnt: u16,
-    srcaddr: Option<*const ()>,
-    dstaddr: Option<*const ()>,
-    descaddr: Option<*mut TransferDescriptor>,
+    srcaddr: Option<NonNull<()>>,
+    dstaddr: Option<NonNull<()>>,
+    descaddr: Option<NonNull<TransferDescriptor>>,
 }
 
 unsafe impl Send for TransferDescriptor {}
@@ -52,36 +53,28 @@ impl TransferDescriptor {
     }
 
     /// Get the type-erased source address.
-    pub fn get_src_addr(&self) -> Option<*const ()> {
+    pub fn get_src_addr(&self) -> Option<NonNull<()>> {
         self.srcaddr
     }
 
     /// Get the type-erased destination address.
-    pub fn get_dst_addr(&self) -> Option<*const ()> {
+    pub fn get_dst_addr(&self) -> Option<NonNull<()>> {
         self.dstaddr
     }
 
     /// Get address for the next linked descriptor.
-    pub fn get_next_desc_addr(&self) -> Option<*mut TransferDescriptor> {
+    pub fn get_next_desc_addr(&self) -> Option<NonNull<TransferDescriptor>> {
         self.descaddr
     }
 
     /// Set the source address of the descriptor. This is a type erased pointer.
-    pub fn set_src_addr(&mut self, addr: *const ()) {
-        self.srcaddr = if addr.is_null() {
-            None
-        } else {
-            Some(addr)
-        };
+    pub fn set_src_addr(&mut self, addr: *mut ()) {
+        self.srcaddr = NonNull::new(addr)
     }
 
     /// Set the destination address of the descriptor. This is a type erased pointer.
-    pub fn set_dst_addr(&mut self, addr: *const ()) {
-        self.dstaddr = if addr.is_null() {
-            None
-        } else {
-            Some(addr)
-        };
+    pub fn set_dst_addr(&mut self, addr: *mut ()) {
+        self.dstaddr = NonNull::new(addr)
     }
 
     /// Mark the descriptor as valid.
@@ -205,11 +198,11 @@ impl TransferDescriptor {
 
     /// Link a transfer descriptor to execute AFTER this descriptor.
     pub fn link_descriptor(&mut self, next: &mut TransferDescriptor) {
-        self.descaddr = Some(next);
+        self.descaddr = Some(next.into());
     }
 
     /// Unlink the next transfer descriptor, returning its address (which maybe null).
-    pub fn unlink_descriptor(&mut self) -> Option<*mut TransferDescriptor> {
+    pub fn unlink_descriptor(&mut self) -> Option<NonNull<TransferDescriptor>> {
         self.descaddr.take()
     }
 }
