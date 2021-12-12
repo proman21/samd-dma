@@ -37,6 +37,8 @@ pub struct TransferDescriptor {
     descaddr: Option<*mut TransferDescriptor>,
 }
 
+unsafe impl Send for TransferDescriptor {}
+
 impl TransferDescriptor {
     /// Create a new empty descriptor.
     pub const fn new() -> TransferDescriptor {
