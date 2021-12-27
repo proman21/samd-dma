@@ -68,6 +68,8 @@ pub struct Channel {
     write_back: *mut TransferDescriptor,
 }
 
+unsafe impl Send for Channel {}
+
 impl Channel {
     pub(crate) fn new(id: u8, first_desc: *mut TransferDescriptor,
         write_back: *mut TransferDescriptor) -> Channel
@@ -184,9 +186,9 @@ impl Channel {
         Interrupts::from_bits_truncate(channel_reg!(chintflag, self.id).read().bits())
     }
 
-    /// Reset the channel's interrupt flags.
-    pub fn clear_interrupt_flags(&mut self) {
-        channel_reg!(chintflag, self.id).reset();
+    /// Reset the specified interrupt flags for the channel.
+    pub fn clear_interrupt_flags(&mut self, flags: Interrupts) {
+        channel_reg!(chintflag, self.id).write(|w| unsafe { w.bits(flags.bits()) });
     }
 
     /// Enable interrupts for the channel. Any interrupts that are not set will be disabled.
@@ -303,7 +305,7 @@ impl Channel {
     pub fn poll_status(&mut self) -> Result<WaitResult, TransactionError> {
         let intflag = self.get_interrupt_flags();
         let status = channel_reg!(chstatus, self.id).read();
-        self.clear_interrupt_flags();
+        self.clear_interrupt_flags(Interrupts::all());
 
         if channel_reg!(chctrla, self.id).read().enable().bit_is_set() {
             if intflag.intersects(Interrupts::TERR) {
